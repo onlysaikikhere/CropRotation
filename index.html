@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Crop Rotation Planner</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script>
+        // Check for saved theme preference in localStorage
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Toggle light/dark mode
+        function toggleMode() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('mode-icon').textContent = '🌙';  // Change to moon icon for light mode
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('mode-icon').textContent = '🌞';  // Change to sun icon for dark mode
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-all">
+    <nav class="bg-green-600 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-white text-xl font-bold">Crop Planner</a>
+            <div>
+                <a href="/fields" class="text-white mr-4">View Fields</a>
+                <a href="/add_field" class="text-white">Add Field</a>
+            </div>
+            <!-- Mode toggle button with icon -->
+            <button class="toggle-button text-white p-2 rounded-full hover:bg-gray-600" onclick="toggleMode()">
+                <span id="mode-icon">🌙</span> <!-- Default moon icon for light mode -->
+            </button>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-8 px-4 text-gray-900 dark:text-gray-200">
+        {% if page == 'home' %}
+        <!-- Home Page Content -->
+        <div class="text-center">
+            <h1 class="text-4xl font-bold mb-8">Welcome to Crop Rotation Planner</h1>
+            <p class="text-xl mb-8">Get recommendations for your next crop rotation</p>
+            <div class="space-x-4">
+                <a href="/add_field" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">Add Field</a>
+                <a href="/fields" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">View Fields</a>
+            </div>
+        </div>
+
+        {% elif page == 'fields' %}
+        <!-- Fields List Content -->
+        <div class="space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold">Your Fields</h2>
+                <a href="/add_field" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Add Field</a>
+            </div>
+            
+            {% if fields %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for field in fields %}
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-semibold mb-2">{{ field.name }}</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Area: {{ field.area }} hectares</p>
+                            <p class="text-gray-600 dark:text-gray-400">Current Crop: {{ field.current_crop }}</p>
+                            <p class="text-gray-600 dark:text-gray-400">Soil Type: {{ field.soil_type }}</p>
+                            
+                            {% if recommendations.get(field.current_crop) %}
+                                <div class="mt-4">
+                                    <h4 class="font-semibold">Recommended Next Crops:</h4>
+                                    <ul class="list-disc list-inside">
+                                        {% for crop in recommendations[field.current_crop] %}
+                                            <li>{{ crop }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-600 dark:text-gray-400">No fields added yet. Add your first field to get started!</p>
+            {% endif %}
+        </div>
+
+        {% elif page == 'add_field' %}
+        <!-- Add Field Form -->
+        <div class="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6">
+            <h2 class="text-2xl font-bold mb-6 text-center">Add New Field</h2>
+            <form method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300">Field Name</label>
+                    <input type="text" name="name" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300">Area (hectares)</label>
+                    <input type="number" step="0.01" name="area" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300">Current Crop</label>
+                    <input type="text" name="current_crop" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                </div>
+                <button type="submit" class="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">Add Field</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
